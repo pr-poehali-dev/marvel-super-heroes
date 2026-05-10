@@ -23,55 +23,78 @@ const StatBar = ({ value, label, color }: { value: number; label: string; color:
 );
 
 export default function HeroCard({ hero, onClick, animDelay = '' }: HeroCardProps) {
+  const isVillain = hero.type === 'villain';
+
   return (
     <div
       className={`hero-card comic-border-heavy bg-white slide-up ${animDelay}`}
       onClick={() => onClick(hero)}
-      style={{ borderRadius: '4px', overflow: 'hidden' }}
+      style={{
+        borderRadius: '4px',
+        overflow: 'hidden',
+        borderColor: isVillain ? '#991B1B' : 'var(--comic-black)',
+        boxShadow: isVillain ? '6px 6px 0px #991B1B' : '6px 6px 0px var(--comic-black)'
+      }}
     >
-      <div className="relative halftone" style={{ background: hero.bgColor, height: '220px' }}>
+      <div className="relative halftone" style={{ background: hero.bgColor, height: '200px' }}>
+        {/* Type badge */}
         <div
-          className="absolute top-3 left-3 z-10 tag-badge"
-          style={{ background: hero.color, color: 'white' }}
+          className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center border-2 border-black font-black"
+          style={{ background: isVillain ? '#991B1B' : '#1D4ED8', fontSize: '12px', borderRadius: '2px' }}
+          title={isVillain ? 'Злодей' : 'Герой'}
         >
-          {hero.power}
+          {isVillain ? '💀' : '🛡'}
         </div>
+
+        {/* Threat level */}
+        {hero.threatLevel && (
+          <div
+            className="absolute top-2 left-2 z-10 tag-badge"
+            style={{ background: '#000', color: '#FF4444', fontSize: '9px' }}
+          >
+            ⚠ {hero.threatLevel}
+          </div>
+        )}
+
         <img
           src={hero.image}
           alt={hero.name}
           className="w-full h-full object-cover object-top"
           style={{ mixBlendMode: 'multiply' }}
         />
-        <div
-          className="absolute bottom-0 left-0 right-0 px-3 py-2"
-          style={{ background: hero.color }}
-        >
-          <div className="pop-text text-xl text-white">{hero.name}</div>
-          <div className="text-xs text-white/80 font-medium" style={{ fontFamily: 'Oswald, sans-serif' }}>
+        <div className="absolute bottom-0 left-0 right-0 px-2 py-1.5" style={{ background: hero.color }}>
+          <div className="pop-text text-base text-white leading-tight">{hero.name}</div>
+          <div className="text-[10px] text-white/75 font-medium truncate" style={{ fontFamily: 'Oswald' }}>
             {hero.alias}
           </div>
         </div>
       </div>
 
-      <div className="p-3 bg-white">
-        <div className="flex flex-wrap gap-1 mb-3">
-          {hero.tags.map(tag => (
-            <span key={tag} className="tag-badge bg-yellow-300 text-black text-[10px]">{tag}</span>
+      <div className="p-2.5 bg-white">
+        <div className="flex flex-wrap gap-1 mb-2">
+          {hero.tags.slice(0, 2).map(tag => (
+            <span
+              key={tag}
+              className="tag-badge text-[9px]"
+              style={{ background: isVillain ? '#1a0000' : 'var(--comic-black)', color: isVillain ? '#FF4444' : 'var(--comic-yellow)' }}
+            >
+              {tag}
+            </span>
           ))}
         </div>
         <StatBar value={hero.stats.strength} label="Сила" color={hero.color} />
         <StatBar value={hero.stats.speed} label="Скорость" color={hero.color} />
         <StatBar value={hero.stats.intelligence} label="Интеллект" color={hero.color} />
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-gray-500 font-medium" style={{ fontFamily: 'Oswald' }}>
-            С {hero.firstAppearance} г.
+        <div className="mt-2.5 flex items-center justify-between">
+          <span className="text-[10px] text-gray-400 font-medium" style={{ fontFamily: 'Oswald' }}>
+            {hero.firstAppearance} г.
           </span>
           <button
-            className="flex items-center gap-1 px-3 py-1 text-xs font-bold text-white comic-border transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+            className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold text-white comic-border transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
             style={{ background: hero.color, fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.05em' }}
           >
-            <Icon name="BookOpen" size={12} />
-            История
+            <Icon name="BookOpen" size={10} />
+            Досье
           </button>
         </div>
       </div>

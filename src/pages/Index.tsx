@@ -7,13 +7,17 @@ import Icon from '@/components/ui/icon';
 const SECTIONS = ['главная', 'галерея', 'история'] as const;
 type Section = typeof SECTIONS[number];
 
-const POWER_FILTERS = ['Все', 'Технологии', 'Суперсила', 'Молния', 'Шпион', 'Гений', 'Бог', 'Полёт', 'Паутина'];
+const TAG_FILTERS = ['Все', 'Мститель', 'Магия', 'Суперсила', 'Технологии', 'Бог', 'Шпион', 'ИИ', 'Кри'];
 
 export default function Index() {
   const [section, setSection] = useState<Section>('главная');
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('Все');
+  const [activeTag, setActiveTag] = useState('Все');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'hero' | 'villain'>('all');
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
+
+  const heroCount = heroes.filter(h => h.type === 'hero').length;
+  const villainCount = heroes.filter(h => h.type === 'villain').length;
 
   const filtered = useMemo(() => {
     return heroes.filter(h => {
@@ -22,12 +26,16 @@ export default function Index() {
         h.alias.toLowerCase().includes(search.toLowerCase()) ||
         h.power.toLowerCase().includes(search.toLowerCase()) ||
         h.tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
-      const matchFilter = activeFilter === 'Все' || h.tags.includes(activeFilter);
-      return matchSearch && matchFilter;
+      const matchTag = activeTag === 'Все' || h.tags.includes(activeTag);
+      const matchType = typeFilter === 'all' || h.type === typeFilter;
+      return matchSearch && matchTag && matchType;
     });
-  }, [search, activeFilter]);
+  }, [search, activeTag, typeFilter]);
 
   const delays = ['delay-100', 'delay-200', 'delay-300', 'delay-400'];
+
+  const featuredHeroes = heroes.filter(h => h.type === 'hero').slice(0, 4);
+  const featuredVillains = heroes.filter(h => h.type === 'villain').slice(0, 4);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--comic-yellow)', backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.12) 1px, transparent 1px)', backgroundSize: '18px 18px' }}>
@@ -41,11 +49,11 @@ export default function Index() {
             </div>
             <span className="pop-text text-xl" style={{ color: 'var(--comic-yellow)' }}>МЕГАГЕРОИ</span>
           </div>
-          <div className="flex gap-6">
+          <div className="flex gap-1 md:gap-6">
             {SECTIONS.map(s => (
               <button
                 key={s}
-                className="nav-link text-sm transition-all"
+                className="nav-link text-xs md:text-sm px-2 py-1 transition-all"
                 style={{ color: section === s ? 'var(--comic-yellow)' : 'rgba(255,255,255,0.7)' }}
                 onClick={() => setSection(s)}
               >
@@ -59,60 +67,78 @@ export default function Index() {
       {/* === ГЛАВНАЯ === */}
       {section === 'главная' && (
         <div>
-          {/* Hero section */}
-          <div className="relative overflow-hidden" style={{ minHeight: '90vh', background: 'var(--comic-red)' }}>
+          {/* Hero banner */}
+          <div className="relative overflow-hidden" style={{ minHeight: '85vh', background: 'var(--comic-red)' }}>
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, white 1.5px, transparent 1.5px)', backgroundSize: '14px 14px' }} />
             <div className="absolute inset-0" style={{ background: 'repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(0,0,0,0.05) 40px, rgba(0,0,0,0.05) 42px)' }} />
 
-            <div className="relative z-10 max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between min-h-[90vh] py-16">
+            <div className="relative z-10 max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between min-h-[85vh] py-12">
               <div className="md:w-1/2 mb-12 md:mb-0">
                 <div className="inline-block mb-4 px-3 py-1 border-2 border-black bg-yellow-400 slide-up" style={{ boxShadow: '3px 3px 0 black' }}>
                   <span className="text-xs font-black" style={{ fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    ⚡ Официальная Энциклопедия
+                    ⚡ Официальная Энциклопедия MCU
                   </span>
                 </div>
-
-                <h1 className="pop-text-lg mb-4 slide-up delay-100" style={{ fontSize: 'clamp(3rem, 8vw, 6rem)', lineHeight: '0.9', color: 'var(--comic-yellow)' }}>
-                  ВСЕЛЕННАЯ<br />МЕГАГЕРОЕВ
+                <h1 className="pop-text-lg mb-4 slide-up delay-100" style={{ fontSize: 'clamp(2.8rem, 8vw, 5.5rem)', lineHeight: '0.9', color: 'var(--comic-yellow)' }}>
+                  ВСЕЛЕННАЯ<br />МАРВЕЛ
                 </h1>
-
+                <div className="flex gap-4 mb-5 slide-up delay-200">
+                  <div className="px-3 py-2 border-2 border-black text-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
+                    <div className="pop-text text-2xl text-white">{heroCount}</div>
+                    <div className="text-xs text-white/70" style={{ fontFamily: 'Oswald', textTransform: 'uppercase' }}>Героев</div>
+                  </div>
+                  <div className="px-3 py-2 border-2 border-black text-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                    <div className="pop-text text-2xl" style={{ color: '#FF4444' }}>{villainCount}</div>
+                    <div className="text-xs text-white/70" style={{ fontFamily: 'Oswald', textTransform: 'uppercase' }}>Злодеев</div>
+                  </div>
+                </div>
                 <div className="speech-bubble p-4 mb-6 slide-up delay-200 max-w-md">
                   <p className="text-sm font-medium text-gray-700">
-                    Четыре легендарных защитника. Сотни злодеев повержены. Один вопрос: кто следующий?
+                    {heroCount} героев, {villainCount} злодеев. Реальные характеристики. Полные истории происхождения из кинофильмов Marvel.
                   </p>
                 </div>
-
                 <div className="flex gap-3 flex-wrap slide-up delay-300">
                   <button
-                    className="px-6 py-3 font-black text-sm transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+                    className="px-5 py-2.5 font-black text-sm transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
                     style={{ background: 'var(--comic-yellow)', color: 'var(--comic-black)', fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.08em', border: '3px solid black', boxShadow: '5px 5px 0 black' }}
-                    onClick={() => setSection('галерея')}
+                    onClick={() => { setTypeFilter('hero'); setSection('галерея'); }}
                   >
-                    <span className="flex items-center gap-2"><Icon name="Users" size={16} />Галерея героев</span>
+                    <span className="flex items-center gap-2"><Icon name="Shield" size={15} />Герои</span>
                   </button>
                   <button
-                    className="px-6 py-3 font-black text-sm transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+                    className="px-5 py-2.5 font-black text-sm transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
+                    style={{ background: '#1a0000', color: '#FF4444', fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.08em', border: '3px solid #FF4444', boxShadow: '5px 5px 0 #FF4444' }}
+                    onClick={() => { setTypeFilter('villain'); setSection('галерея'); }}
+                  >
+                    <span className="flex items-center gap-2"><Icon name="Skull" size={15} />Злодеи</span>
+                  </button>
+                  <button
+                    className="px-5 py-2.5 font-black text-sm transition-all active:translate-x-1 active:translate-y-1 active:shadow-none"
                     style={{ background: 'white', color: 'var(--comic-black)', fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.08em', border: '3px solid black', boxShadow: '5px 5px 0 black' }}
                     onClick={() => setSection('история')}
                   >
-                    <span className="flex items-center gap-2"><Icon name="BookOpen" size={16} />Истории</span>
+                    <span className="flex items-center gap-2"><Icon name="BookOpen" size={15} />Истории</span>
                   </button>
                 </div>
               </div>
 
+              {/* Portrait grid */}
               <div className="md:w-1/2 flex justify-center">
-                <div className="grid grid-cols-2 gap-3 slide-up delay-200">
-                  {heroes.slice(0, 4).map((hero, i) => (
+                <div className="grid grid-cols-4 gap-2 slide-up delay-200">
+                  {heroes.slice(0, 8).map((hero, i) => (
                     <div
                       key={hero.id}
-                      className="hero-card comic-border-heavy overflow-hidden cursor-pointer"
-                      style={{ width: '130px', height: '160px', borderRadius: '4px', animationDelay: `${0.1 * i + 0.3}s`, animationFillMode: 'both' }}
+                      className="hero-card comic-border overflow-hidden cursor-pointer relative"
+                      style={{ width: '80px', height: '100px', borderRadius: '3px', animationDelay: `${0.08 * i + 0.2}s`, animationFillMode: 'both' }}
                       onClick={() => setSelectedHero(hero)}
                     >
-                      <div className="relative w-full h-full halftone" style={{ background: hero.bgColor }}>
+                      <div className="relative w-full h-full" style={{ background: hero.bgColor }}>
                         <img src={hero.image} alt={hero.name} className="w-full h-full object-cover object-top" style={{ mixBlendMode: 'multiply' }} />
-                        <div className="absolute bottom-0 left-0 right-0 py-1 px-2 text-center" style={{ background: hero.color }}>
-                          <span className="pop-text text-white" style={{ fontSize: '11px' }}>{hero.name}</span>
+                        {hero.type === 'villain' && (
+                          <div className="absolute top-0 right-0 w-3 h-3" style={{ background: '#FF4444', borderLeft: '1px solid black', borderBottom: '1px solid black' }} />
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 py-0.5 px-1 text-center" style={{ background: hero.color }}>
+                          <span className="text-white font-black" style={{ fontSize: '8px', fontFamily: 'Oswald', textTransform: 'uppercase' }}>{hero.name.split(' ')[0]}</span>
                         </div>
                       </div>
                     </div>
@@ -121,20 +147,18 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="absolute bottom-8 right-8 opacity-80 bounce-in delay-500">
-              <div className="pop-text-lg text-6xl text-yellow-300" style={{ transform: 'rotate(-8deg)', textShadow: '4px 4px 0 rgba(0,0,0,0.5)' }}>
-                КАБ!
-              </div>
+            <div className="absolute bottom-6 right-6 opacity-80 bounce-in delay-500">
+              <div className="pop-text-lg text-5xl text-yellow-300" style={{ transform: 'rotate(-8deg)', textShadow: '4px 4px 0 rgba(0,0,0,0.5)' }}>КАБ!</div>
             </div>
           </div>
 
           {/* Stats strip */}
           <div className="border-y-4 border-black" style={{ background: 'var(--comic-black)' }}>
-            <div className="max-w-6xl mx-auto px-4 py-4 flex justify-around items-center">
+            <div className="max-w-6xl mx-auto px-4 py-4 flex justify-around items-center flex-wrap gap-4">
               {[
-                { num: '4', label: 'Героя' },
-                { num: '12+', label: 'Злодеев' },
-                { num: '3', label: 'Года' },
+                { num: String(heroCount), label: 'Героев' },
+                { num: String(villainCount), label: 'Злодеев' },
+                { num: '23', label: 'Фильма' },
                 { num: '∞', label: 'Побед' },
               ].map(stat => (
                 <div key={stat.label} className="text-center">
@@ -145,15 +169,33 @@ export default function Index() {
             </div>
           </div>
 
-          {/* Cards preview */}
-          <div className="max-w-6xl mx-auto px-4 py-16">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-3 h-10 border-2 border-black" style={{ background: 'var(--comic-red)' }} />
-              <h2 className="pop-text text-3xl">Топ Герои</h2>
+          {/* Heroes section */}
+          <div className="max-w-6xl mx-auto px-4 py-12">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-3 h-10 border-2 border-black" style={{ background: 'var(--comic-blue)' }} />
+              <h2 className="pop-text text-3xl">Мстители</h2>
               <div className="flex-1 border-t-2 border-black border-dashed" />
+              <button className="tag-badge bg-black text-yellow-300 cursor-pointer hover:bg-gray-800" onClick={() => { setTypeFilter('hero'); setSection('галерея'); }}>
+                Все герои →
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {featuredHeroes.map((hero, i) => (
+                <HeroCard key={hero.id} hero={hero} onClick={setSelectedHero} animDelay={delays[i]} />
+              ))}
+            </div>
+
+            {/* Villains section */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-3 h-10 border-2 border-black" style={{ background: 'var(--comic-red)' }} />
+              <h2 className="pop-text text-3xl" style={{ color: '#1a0000' }}>Злодеи</h2>
+              <div className="flex-1 border-t-2 border-black border-dashed" />
+              <button className="tag-badge cursor-pointer" style={{ background: '#1a0000', color: '#FF4444', borderColor: '#FF4444' }} onClick={() => { setTypeFilter('villain'); setSection('галерея'); }}>
+                Все злодеи →
+              </button>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {heroes.map((hero, i) => (
+              {featuredVillains.map((hero, i) => (
                 <HeroCard key={hero.id} hero={hero} onClick={setSelectedHero} animDelay={delays[i]} />
               ))}
             </div>
@@ -166,28 +208,43 @@ export default function Index() {
         <div className="max-w-6xl mx-auto px-4 py-10">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-3 h-10 border-2 border-black" style={{ background: 'var(--comic-blue)' }} />
-            <h2 className="pop-text text-3xl">Галерея Героев</h2>
+            <h2 className="pop-text text-3xl">Галерея</h2>
           </div>
 
           <div className="mb-8 p-4 bg-white comic-border-heavy" style={{ borderRadius: '4px' }}>
+            {/* Type toggle */}
+            <div className="flex gap-2 mb-4">
+              {([['all', 'Все персонажи', '#333', 'white'], ['hero', '🛡 Герои', 'var(--comic-blue)', 'white'], ['villain', '💀 Злодеи', 'var(--comic-red)', 'white']] as const).map(([val, label, bg, fg]) => (
+                <button
+                  key={val}
+                  onClick={() => setTypeFilter(val)}
+                  className="px-4 py-2 font-black text-xs border-2 border-black transition-all"
+                  style={{ background: typeFilter === val ? bg : 'white', color: typeFilter === val ? fg : 'black', fontFamily: 'Oswald', textTransform: 'uppercase', boxShadow: typeFilter === val ? '3px 3px 0 black' : 'none' }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {/* Search */}
             <div className="relative mb-4">
               <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
-                placeholder="Поиск по имени, силе или характеристике..."
+                placeholder="Поиск по имени, силе или тегу..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 border-2 border-black bg-yellow-50 text-sm focus:outline-none focus:bg-yellow-100 font-medium"
                 style={{ borderRadius: '2px', fontFamily: 'Rubik' }}
               />
             </div>
+            {/* Tags */}
             <div className="flex flex-wrap gap-2">
-              {POWER_FILTERS.map(f => (
+              {TAG_FILTERS.map(f => (
                 <button
                   key={f}
-                  onClick={() => setActiveFilter(f)}
+                  onClick={() => setActiveTag(f)}
                   className="tag-badge transition-all"
-                  style={{ background: activeFilter === f ? 'var(--comic-black)' : 'white', color: activeFilter === f ? 'var(--comic-yellow)' : 'var(--comic-black)', cursor: 'pointer' }}
+                  style={{ background: activeTag === f ? 'var(--comic-black)' : 'white', color: activeTag === f ? 'var(--comic-yellow)' : 'var(--comic-black)', cursor: 'pointer' }}
                 >
                   {f}
                 </button>
@@ -198,15 +255,20 @@ export default function Index() {
           {filtered.length === 0 ? (
             <div className="text-center py-20 comic-border-heavy bg-white" style={{ borderRadius: '4px' }}>
               <div className="text-5xl mb-4">🦸</div>
-              <div className="pop-text text-xl mb-2">Герой не найден!</div>
+              <div className="pop-text text-xl mb-2">Не найдено!</div>
               <p className="text-gray-500 text-sm">Попробуй другое имя или характеристику</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {filtered.map((hero, i) => (
-                <HeroCard key={hero.id} hero={hero} onClick={setSelectedHero} animDelay={delays[i % 4]} />
-              ))}
-            </div>
+            <>
+              <div className="mb-3 text-xs font-bold" style={{ fontFamily: 'Oswald', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Найдено: {filtered.length} персонажей
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {filtered.map((hero, i) => (
+                  <HeroCard key={hero.id} hero={hero} onClick={setSelectedHero} animDelay={delays[i % 4]} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -221,11 +283,24 @@ export default function Index() {
 
           <div className="space-y-8">
             {heroes.map((hero, i) => (
-              <div key={hero.id} className={`bg-white comic-border-xl slide-up ${delays[i]}`} style={{ borderRadius: '4px', overflow: 'hidden' }}>
+              <div key={hero.id} className={`bg-white comic-border-xl slide-up ${delays[i % 4]}`} style={{ borderRadius: '4px', overflow: 'hidden' }}>
                 <div className="flex items-center gap-4 p-4 border-b-4 border-black halftone" style={{ background: hero.bgColor }}>
                   <img src={hero.image} alt={hero.name} className="w-20 h-20 object-cover object-top comic-border" style={{ borderRadius: '3px', mixBlendMode: 'multiply', flexShrink: 0 }} />
-                  <div>
-                    <div className="inline-block tag-badge mb-2" style={{ background: hero.color, color: 'white' }}>{hero.origin}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <div className="inline-block tag-badge" style={{ background: hero.color, color: 'white' }}>{hero.origin}</div>
+                      <div
+                        className="inline-block tag-badge"
+                        style={{ background: hero.type === 'hero' ? '#1D4ED8' : '#991B1B', color: 'white' }}
+                      >
+                        {hero.type === 'hero' ? '🛡 Герой' : '💀 Злодей'}
+                      </div>
+                      {hero.threatLevel && (
+                        <div className="inline-block tag-badge" style={{ background: '#000', color: '#FF4444' }}>
+                          ⚠ {hero.threatLevel}
+                        </div>
+                      )}
+                    </div>
                     <div className="pop-text text-2xl">{hero.name}</div>
                     <div className="text-sm text-gray-600" style={{ fontFamily: 'Oswald' }}>{hero.alias} · С {hero.firstAppearance} г.</div>
                   </div>
@@ -270,7 +345,7 @@ export default function Index() {
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="pop-text text-lg" style={{ color: 'var(--comic-yellow)' }}>МЕГАГЕРОИ</div>
           <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Oswald' }}>
-            © 2024 МЕГАГЕРОИ. ВСЕ ПРАВА ЗАЩИЩЕНЫ.
+            © 2024 МЕГАГЕРОИ. MARVEL CHARACTERS. ALL RIGHTS RESERVED.
           </div>
         </div>
       </footer>
