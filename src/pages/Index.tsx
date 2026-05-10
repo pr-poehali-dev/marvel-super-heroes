@@ -7,7 +7,7 @@ import Icon from '@/components/ui/icon';
 const SECTIONS = ['главная', 'галерея', 'история'] as const;
 type Section = typeof SECTIONS[number];
 
-const POWER_FILTERS = ['Все', 'Электричество', 'Магия', 'Темнота', 'Сила', 'Скорость', 'Полёт'];
+const POWER_FILTERS = ['Все', 'Технологии', 'Суперсила', 'Молния', 'Шпион', 'Гений', 'Бог', 'Полёт', 'Паутина'];
 
 export default function Index() {
   const [section, setSection] = useState<Section>('главная');
